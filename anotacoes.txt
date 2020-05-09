@@ -1,0 +1,5 @@
+link da serie no youtube
+    https://www.youtube.com/watch?v=JQaL5YiSuqE&list=PL4cUxeGkcC9gTxqJBcDmoi5Q2pzDusSL7&index=2
+
+link do github (para o tema inicial baixar branch 2) 
+    https://github.com/iamshaunjp/pwa-tutorial
