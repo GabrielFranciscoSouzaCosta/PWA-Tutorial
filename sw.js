@@ -1,5 +1,5 @@
 const staticCacheName = 'site-static-v3';
-const dynamicCache = 'site-dynamic-v1';
+const dynamicCacheName = 'site-dynamic-v1';
 const assets = [
 	'/',
 	'/index.html',
@@ -10,7 +10,8 @@ const assets = [
 	'/css/materialize.min.css',
 	'/img/dish.png',
 	'https://fonts.googleapis.com/icon?family=Material+Icons',
-	'https://fonts.gstatic.com/s/materialicons/v50/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2'
+	'https://fonts.gstatic.com/s/materialicons/v50/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2',
+	'/pages/fallback.html'
 ];
 
 self.addEventListener('install', (evt) => {
@@ -32,7 +33,7 @@ self.addEventListener('activate', evt => {
 	evt.waitUntil(
 		caches.keys().then(keys => {
 			return Promise.all(keys
-				.filter(key => key !== staticCacheName)
+				.filter(key => key !== staticCacheName && key !== dynamicCacheName)
 				.map(key => caches.delete(key))
 			)
 		})
@@ -45,12 +46,12 @@ self.addEventListener('fetch', evt => {
 	evt.respondWith(
 		caches.match(evt.request).then(cacheRes => {
 			return cacheRes || fetch(evt.request).then(fetchRes => {
-				return caches.open(dynamicCache).then(cache => {
+				return caches.open(dynamicCacheName).then(cache => {
 					cache.put(evt.request.url, fetchRes.clone())
 					return fetchRes
 				})
 			});
-		})
+		}).catch( ()=> caches.match('/pages/fallback.html'))
 	);
 
 	//console.log( 'fetch event', evt );
