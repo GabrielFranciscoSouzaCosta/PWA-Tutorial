@@ -1,18 +1,30 @@
 const staticCacheName = 'site-static-v3';
 const dynamicCacheName = 'site-dynamic-v1';
 const assets = [
-	'/',
-	'/index.html',
-	'/js/app.js',
-	'/js/ui.js',
-	'/js/materialize.min.js',
-	'/css/styles.css',
-	'/css/materialize.min.css',
-	'/img/dish.png',
+	'http://localhost/gabriel/PWA-Tutorial/',
+	'http://localhost/gabriel/PWA-Tutorial/index.html',
+	'http://localhost/gabriel/PWA-Tutorial/js/app.js',
+	'http://localhost/gabriel/PWA-Tutorial/js/ui.js',
+	'http://localhost/gabriel/PWA-Tutorial/js/materialize.min.js',
+	'http://localhost/gabriel/PWA-Tutorial/css/styles.css',
+	'http://localhost/gabriel/PWA-Tutorial/css/materialize.min.css',
+	'http://localhost/gabriel/PWA-Tutorial/img/dish.png',
 	'https://fonts.googleapis.com/icon?family=Material+Icons',
 	'https://fonts.gstatic.com/s/materialicons/v50/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2',
-	'/pages/fallback.html'
+	'http://localhost/gabriel/PWA-Tutorial/pages/fallback.html'
 ];
+
+// cache size limit function
+const limitCacheSize = (name, size) => {
+	caches.open(name).then(cache => {
+		cache.keys().then(keys => {
+			if(keys.length > size)
+			{
+				cache.delete(keys[0]).then(limitCacheSize(name, size))
+			}
+		})
+	})
+}
 
 self.addEventListener('install', (evt) => {
 	// dentro do evento install é o lugar ideal para salvar os assets em cache
@@ -42,22 +54,20 @@ self.addEventListener('activate', evt => {
 
 // fetch event
 self.addEventListener('fetch', evt => {
-
 	evt.respondWith(
 		caches.match(evt.request).then(cacheRes => {
 			return cacheRes || fetch(evt.request).then(fetchRes => {
 				return caches.open(dynamicCacheName).then(cache => {
-					cache.put(evt.request.url, fetchRes.clone())
-					return fetchRes
+					cache.put(evt.request.url, fetchRes.clone());
+					limitCacheSize(dynamicCacheName, 20);
+					return fetchRes;
 				})
 			});
-		}).catch( ()=> {
+		}).catch(()=> {
 			if(evt.request.url.indexOf('.html') > -1)
 			{
 				return caches.match('/pages/fallback.html')
 			}
 		})
 	);
-
-	//console.log( 'fetch event', evt );
 });
